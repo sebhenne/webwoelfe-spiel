@@ -3,12 +3,20 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
+
 
 /**
- * @ApiResource()
+ * @ApiResource(
+ *     collectionOperations={"get", "post"},
+ *     itemOperations={"get", "put"},
+ *     normalizationContext={"groups"={"board:read"}},
+ *     denormalizationContext={"groups"={"board:write"}}
+ * )
  * @ORM\Entity(repositoryClass="App\Repository\BoardRepository")
  */
 class Board
@@ -22,18 +30,28 @@ class Board
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"board:read","board:write","game:read","game:write"})
      */
     private $name;
 
     /**
      * @ORM\Column(type="boolean")
+     * @Groups({"board:read","board:write","game:read","game:write"})
      */
     private $master;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Player", mappedBy="board", orphanRemoval=true)
+     * @ApiSubresource()
+     * @Groups({"board:read","board:write","game:read"})
      */
     private $players;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Game", inversedBy="boards")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $game;
 
     public function __construct()
     {
@@ -77,6 +95,9 @@ class Board
         return $this->players;
     }
 
+    /*
+     * @Groups({"board:write"})
+     */
     public function addPlayer(Player $player): self
     {
         if (!$this->players->contains($player)) {
@@ -96,6 +117,18 @@ class Board
                 $player->setBoard(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getGame(): ?Game
+    {
+        return $this->game;
+    }
+
+    public function setGame(?Game $game): self
+    {
+        $this->game = $game;
 
         return $this;
     }

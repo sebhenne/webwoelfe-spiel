@@ -4,9 +4,15 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * @ApiResource()
+ * @ApiResource(
+ *     collectionOperations={"get", "post"},
+ *     itemOperations={"get", "put"},
+ *     normalizationContext={"groups"={"player:read"}},
+ *     denormalizationContext={"groups"={"player:write"}}
+ * )
  * @ORM\Entity(repositoryClass="App\Repository\PlayerRepository")
  */
 class Player
@@ -20,12 +26,14 @@ class Player
 
     /**
      * @ORM\Column(type="string", length=32)
+     * @Groups({"board:write"})
      */
     private $name;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Board", inversedBy="players")
      * @ORM\JoinColumn(nullable=false)
+     * @Groups({"player:read","player:write"})
      */
     private $board;
 

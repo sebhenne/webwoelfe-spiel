@@ -36,15 +36,13 @@ class GameRepository extends ServiceEntityRepository
     }
     */
 
-    /*
-    public function findOneBySomeField($value): ?Game
+    public function findOneByUrlIdentifier($urlIdentifier): ?Game
     {
         return $this->createQueryBuilder('g')
-            ->andWhere('g.exampleField = :val')
-            ->setParameter('val', $value)
+            ->andWhere('g.url_identifier = :val')
+            ->setParameter('val', $urlIdentifier)
             ->getQuery()
             ->getOneOrNullResult()
         ;
     }
-    */
 }
